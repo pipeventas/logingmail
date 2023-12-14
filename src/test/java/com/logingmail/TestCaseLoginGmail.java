@@ -8,10 +8,12 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
+import java.util.Random;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import static org.testng.Assert.fail;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 public class TestCaseLoginGmail {
   private WebDriver driver;
@@ -26,10 +28,19 @@ public void setUp() throws Exception {
   //driver = new EdgeDriver();
   WebDriverManager.firefoxdriver().setup();
   driver = new FirefoxDriver();
-  DesiredCapabilities capabilities = new DesiredCapabilities();
-  capabilities.setCapability("proxy", new Proxy().setHttpProxy("192.168.1.1:8080"));
-  driver = new FirefoxDriver();
-  
+  // Configurar proxy en firefox que es independiente del PC - para evitar que Google identique que Iniciar sesión con un nave
+  //DesiredCapabilities capabilities = new DesiredCapabilities();
+  //capabilities.setCapability("proxy", new Proxy().setHttpProxy("192.168.1.1:8080"));
+  //driver = new FirefoxDriver();
+    // Crear una instancia de la clase FirefoxOptions
+      FirefoxOptions options = new FirefoxOptions();
+      // Crear una instancia del navegador Firefox utilizando la instancia de FirefoxOptions
+      driver = new FirefoxDriver(options);
+      driver.get("https://mail.google.com/");
+      Proxy proxy = new Proxy();
+      proxy.setHttpProxy("192.168.1.1:8080");
+      proxy.setSslProxy("192.168.1.1:8080");
+      options.setProxy(proxy);
       String baseUrl = "https://www.google.com/";
       driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
       JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -40,10 +51,27 @@ public void setUp() throws Exception {
     //driver.get("https://accounts.google.com/InteractiveLogin/signinchooser?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F%26ogbl%2F&emr=1&ltmpl=default&ltmplcache=2&osid=1&passive=true&rm=false&scc=1&service=mail&ss=1&ifkv=ASKXGp1OlySKAAGY4gU2pWBFuCkfw2FEBTRblrVYkNd39jchqlS4EYAg9htgQICIhVGoBNqQMtZE&theme=glif&flowName=GlifWebSignIn&flowEntry=ServiceLogin");
     //driver.get("https://www.google.com/intl/es/gmail/about/");
     driver.get("https://accounts.google.com/signin");
+    // Generar un intervalo de tiempo aleatorio - para evitar que Google identique que Iniciar sesión con un navegador admitido -Están siendo controlados por software automatizado y no por personas.
+    Random random = new Random();
+    int delay = random.nextInt(5) + 1;
+
+    // Esperar el intervalo de tiempo aleatorio
+    try {
+      Thread.sleep(delay * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    // Generar un movimiento aleatorio del mouse
+    int x = random.nextInt(driver.manage().window().getSize().width);
+    int y = random.nextInt(driver.manage().window().getSize().height);
+    // Realizar el movimiento del mouse
+    Actions actions = new Actions(driver);
+    actions.moveByOffset(x, y).perform();
+
     //driver.findElement(By.xpath("//a[normalize-space()='Inicia sesión']")).click();
     driver.findElement(By.id("identifierId")).isDisplayed();
     driver.findElement(By.xpath("//input[@id='identifierId']")).clear();
-    driver.findElement(By.xpath("//input[@id='identifierId']")).sendKeys("lfja333@gmail.com");
+    driver.findElement(By.xpath("//input[@id='identifierId']")).sendKeys("gmltest26@gmail.com");
     driver.findElement(By.xpath("//span[normalize-space()='Siguiente']")).click();
     driver.findElement(By.xpath("//*[@id=\"password\"]/div[1]/div/div[1]/input")).clear();
     driver.findElement(By.xpath("//*[@id=\"password\"]/div[1]/div/div[1]/input")).click();
